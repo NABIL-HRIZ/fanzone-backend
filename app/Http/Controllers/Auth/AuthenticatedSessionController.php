@@ -70,9 +70,12 @@ class AuthenticatedSessionController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
+         $roles = $user->roles->pluck('name'); 
+
         return response()->json([
             'user' => $user,
             'token' => $token,
+            'role'=>$roles
         ], 200);
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use App\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -58,8 +59,16 @@ class RegisteredUserController extends Controller
             'password'   => Hash::make($request->password),
         ]);
 
+ 
+        $user->syncRoles(['fan']);
+
+        $roles = $user->roles->pluck('name');
+
+
         
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        
 
         event(new Registered($user));
 
@@ -69,6 +78,7 @@ class RegisteredUserController extends Controller
             'message' => 'User registered successfully',
             'user' => $user,
             'access_token' => $token,
+            'role'=>$roles
         ]);
     }
 }

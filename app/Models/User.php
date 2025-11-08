@@ -8,10 +8,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laratrust\Contracts\LaratrustUser;
+use Laratrust\Traits\HasRolesAndPermissions;
 
-class User extends Authenticatable
+use App\Model\Reservation;
+use App\Model\Scan;
+
+
+class User extends Authenticatable implements LaratrustUser
 {
-    use HasApiTokens, HasFactory, Notifiable , SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable , SoftDeletes  , HasRolesAndPermissions;
 
     /**
      * The attributes that are mass assignable.
@@ -45,4 +51,15 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function reservations()
+{
+    return $this->hasMany(Reservation::class, 'user_id');
+}
+
+public function scans()
+{
+    return $this->hasMany(Scan::class, 'agent_id');
+}
+
 }
