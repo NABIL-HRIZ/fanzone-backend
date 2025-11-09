@@ -21,7 +21,7 @@ class AuthenticatedSessionController extends Controller
      * @OA\Post(
      *     path="/api/login",
      *     summary="connexion un utilisatuer ",
-     *     tags={"Auth"},
+     *     tags={"Authentification"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -83,7 +83,7 @@ class AuthenticatedSessionController extends Controller
  * @OA\Post(
  *     path="/api/logout",
  *     summary="Déconnexion de l'utilisateur",
- *     tags={"Auth"},
+ *     tags={"Authentification"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Response(
  *         response=200,

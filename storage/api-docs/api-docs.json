@@ -15,10 +15,279 @@
         }
     ],
     "paths": {
+        "/api/show-fans": {
+            "get": {
+                "tags": [
+                    "CRUD _Users"
+                ],
+                "summary": "Afficher tous les utilisateurs avec leurs rôles",
+                "description": "Retourne la liste des utilisateurs avec leurs rôles associés (accessible uniquement aux administrateurs).",
+                "operationId": "079729b90e2da907adac9705f0ec84fe",
+                "responses": {
+                    "200": {
+                        "description": "Liste des utilisateurs récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "first_name": {
+                                                "type": "string",
+                                                "example": "Nabil"
+                                            },
+                                            "last_name": {
+                                                "type": "string",
+                                                "example": "Hariz"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "example": "nabil@test.ma"
+                                            },
+                                            "phone": {
+                                                "type": "string",
+                                                "example": "0612345678"
+                                            },
+                                            "roles": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "example": "admin"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé — Token ou rôle invalide"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/add-fan": {
+            "post": {
+                "tags": [
+                    "CRUD _Users"
+                ],
+                "summary": "Créer un nouveau fan",
+                "operationId": "29f33cf0fc3871dfa7a81484bf29980b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Nabil"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Hariz"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "nabil@test.ma"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0612345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Fan créé avec succès"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/fan/{id}": {
+            "put": {
+                "tags": [
+                    "CRUD _Users"
+                ],
+                "summary": "Mettre à jour un fan",
+                "operationId": "3d25401571c9618757b8a5d7a206b808",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du fan à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Nabil"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Hariz"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "nabil@test.ma"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0612345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Fan mis à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Fan non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CRUD _Users"
+                ],
+                "summary": "Supprimer un fan",
+                "operationId": "d3d3170de8b53b858c8fc866ce77336a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du fan à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fan supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Fan non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/fan-details/{id}": {
+            "get": {
+                "tags": [
+                    "CRUD _Users"
+                ],
+                "summary": "Afficher le détail d'un fan",
+                "operationId": "c49b9376ac378c4d3f3ce4311c9a3072",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du fan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails récupérés avec succès"
+                    },
+                    "404": {
+                        "description": "Fan non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Authentification"
                 ],
                 "summary": "connexion un utilisatuer ",
                 "description": "Login user and create API token",
@@ -110,7 +379,7 @@
         "/api/logout": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Authentification"
                 ],
                 "summary": "Déconnexion de l'utilisateur",
                 "operationId": "0ab4e3cf7bc4f7ec81b48f7928c7de7c",
@@ -162,7 +431,7 @@
         "/api/register": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Authentification"
                 ],
                 "summary": "Register a new user",
                 "operationId": "18235ea6963e661c49bf381065779d6a",
@@ -215,6 +484,1400 @@
                     }
                 }
             }
+        },
+        "/api/contacts": {
+            "get": {
+                "tags": [
+                    "Contact"
+                ],
+                "summary": "Récupérer tous les messages de contact",
+                "operationId": "0f9efb5609dbb039b35ecafb28e492a2",
+                "responses": {
+                    "200": {
+                        "description": "Liste des messages récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "john@example.com"
+                                            },
+                                            "message": {
+                                                "type": "string",
+                                                "example": "Bonjour, je veux plus d'infos."
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2025-11-09T15:30:00Z"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2025-11-09T15:30:00Z"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contact": {
+            "post": {
+                "tags": [
+                    "Contact"
+                ],
+                "summary": "Envoyer un message de contact",
+                "operationId": "4d33e9ce28a28bf1184927750df24ba8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Bonjour, je veux plus d'infos."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message enregistré avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message enregistré !"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bonjour, je veux plus d'infos."
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-09T15:30:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-09T15:30:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/show-matches": {
+            "get": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Afficher tous les matchs (public)",
+                "operationId": "4e218fc6393c2f6d39bd76e8de2d3e1f",
+                "responses": {
+                    "200": {
+                        "description": "Liste des matchs récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "team_one_title": {
+                                                "type": "string",
+                                                "example": "Team A"
+                                            },
+                                            "team_two_title": {
+                                                "type": "string",
+                                                "example": "Team B"
+                                            },
+                                            "match_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2025-12-01"
+                                            },
+                                            "stadium": {
+                                                "type": "string",
+                                                "example": "Stade National"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/match-details/{id}": {
+            "get": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Afficher le détail d'un match",
+                "operationId": "b01ae00729e9ed41228d9492a311647f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du match",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Match récupéré avec succès"
+                    },
+                    "404": {
+                        "description": "Match non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                }
+            }
+        },
+        "/api/add-match": {
+            "post": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Créer un nouveau match",
+                "operationId": "3f450b7c86de37a4f6c54455f56b4a3e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "team_one_title",
+                                    "team_two_title",
+                                    "match_date"
+                                ],
+                                "properties": {
+                                    "team_one_title": {
+                                        "type": "string",
+                                        "example": "Team A"
+                                    },
+                                    "team_one_image": {
+                                        "type": "string",
+                                        "example": "team_a.png"
+                                    },
+                                    "team_two_title": {
+                                        "type": "string",
+                                        "example": "Team B"
+                                    },
+                                    "team_two_image": {
+                                        "type": "string",
+                                        "example": "team_b.png"
+                                    },
+                                    "match_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-01"
+                                    },
+                                    "stadium": {
+                                        "type": "string",
+                                        "example": "Stade National"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Match important"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Match créé avec succès"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/match/{id}": {
+            "put": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Mettre à jour un match",
+                "operationId": "fde15b269b68d6e757967664e0af5675",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du match à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "team_one_title": {
+                                        "type": "string",
+                                        "example": "Team A"
+                                    },
+                                    "team_one_image": {
+                                        "type": "string",
+                                        "example": "team_a.png"
+                                    },
+                                    "team_two_title": {
+                                        "type": "string",
+                                        "example": "Team B"
+                                    },
+                                    "team_two_image": {
+                                        "type": "string",
+                                        "example": "team_b.png"
+                                    },
+                                    "match_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-01"
+                                    },
+                                    "stadium": {
+                                        "type": "string",
+                                        "example": "Stade National"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Match important"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Match mis à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Match non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Supprimer un match",
+                "operationId": "8e1a46bfbae8df2a02cad39e1e5b2cd4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du match à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Match supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Match non trouvé"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/match/search": {
+            "get": {
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Rechercher des matchs",
+                "operationId": "89a2ca3274a819924a9b01d0c918583d",
+                "parameters": [
+                    {
+                        "name": "team",
+                        "in": "query",
+                        "description": "Nom de l'équipe",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Date du match",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Ville",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultat de la recherche"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                }
+            }
+        },
+        "/api/reservations": {
+            "get": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Liste de toutes les réservations (admin)",
+                "operationId": "fbc6050d9f7fdb07075d3aaeb157ffa9",
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée avec succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Créer une nouvelle réservation",
+                "operationId": "01e3d21dc330a31de025203bc142ffa3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "zone_id",
+                                    "number_of_tickets"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "zone_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "number_of_tickets": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "total_price": {
+                                        "type": "number",
+                                        "example": 200.5
+                                    },
+                                    "payment_status": {
+                                        "type": "string",
+                                        "example": "unpaid"
+                                    },
+                                    "reservation_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-12-01T12:00:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Réservation créée avec succès"
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reservations/{id}": {
+            "get": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Afficher une réservation",
+                "operationId": "a226b43b2a6a846245e658d01bf00720",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la réservation",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Réservation récupérée avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Mettre à jour une réservation",
+                "operationId": "02fa683a9f80a0563596fb06685bcbc7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "number_of_tickets": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "total_price": {
+                                        "type": "number",
+                                        "example": 300
+                                    },
+                                    "payment_status": {
+                                        "type": "string",
+                                        "example": "paid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réservation mise à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Supprimer une réservation",
+                "operationId": "9b6641e4ded1ff7adfce352d589b85e9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Réservation supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reservations/search": {
+            "get": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Rechercher des réservations",
+                "operationId": "02c5fc4c4ed1723a2e522c46b5a3326b",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "zone_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "payment_status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultat de la recherche"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reservations/my": {
+            "get": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Afficher mes réservations (user)",
+                "operationId": "15a5489bd77e1ceb1eadd132c949b69d",
+                "responses": {
+                    "200": {
+                        "description": "Liste des réservations de l'utilisateur"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stripe/webhook": {
+            "post": {
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "Webhook Stripe pour créer des réservations après paiement",
+                "operationId": "21a9524c0adbd35515c2e7e2825f77d4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {}
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Webhook reçu avec succès"
+                    },
+                    "400": {
+                        "description": "Erreur Stripe Webhook"
+                    }
+                }
+            }
+        },
+        "/api/scans": {
+            "get": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Liste de tous les scans (admin)",
+                "operationId": "bfc3383c2096185ee2aecdc896eef949",
+                "responses": {
+                    "200": {
+                        "description": "Liste des scans récupérée avec succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Créer un nouveau scan",
+                "operationId": "aabf91569b986f255f4a2d958d99c917",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ticket_id",
+                                    "scan_status"
+                                ],
+                                "properties": {
+                                    "ticket_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "scan_status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "valid",
+                                            "invalid"
+                                        ],
+                                        "example": "valid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Scan enregistré avec succès"
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scans/{id}": {
+            "get": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Afficher un scan spécifique",
+                "operationId": "53ba3de64cb9e2c82b89f8d6e7b163b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du scan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Scan récupéré avec succès"
+                    },
+                    "404": {
+                        "description": "Scan non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Mettre à jour le statut d'un scan",
+                "operationId": "24bfe9c4cea21a5b8651384a2d849bd2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du scan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "scan_status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "valid",
+                                            "invalid"
+                                        ],
+                                        "example": "invalid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Scan mis à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Scan non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Supprimer un scan",
+                "operationId": "80d896b5b43f2c428322c6fb3b789522",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du scan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Scan supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Scan non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scans/search": {
+            "get": {
+                "tags": [
+                    "Scan"
+                ],
+                "summary": "Rechercher des scans par ticket, agent ou statut",
+                "operationId": "235d313c9fd1567a5ab877a4ebf8fe61",
+                "parameters": [
+                    {
+                        "name": "ticket_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "agent_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "scan_status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "valid",
+                                "invalid"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultat de la recherche"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/add-email": {
+            "post": {
+                "tags": [
+                    "Subscribe"
+                ],
+                "summary": "Ajouter un email à la liste de souscription",
+                "operationId": "c02cf6e3f14ce8ecd7b43508727596d1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email enregistré avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email enregistré !"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/show-emails": {
+            "get": {
+                "tags": [
+                    "Subscribe"
+                ],
+                "summary": "Récupérer tous les emails souscrits",
+                "operationId": "d71972dcf42e090654535d1d3d8e9478",
+                "responses": {
+                    "200": {
+                        "description": "Liste des emails récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "emails": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "user@example.com"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/show-zones": {
+            "get": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Afficher toutes les zones (public)",
+                "operationId": "11e5401879b9efb873aaa983c6dc731b",
+                "responses": {
+                    "200": {
+                        "description": "Liste des zones récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "match_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Zone VIP"
+                                            },
+                                            "city": {
+                                                "type": "string",
+                                                "example": "Casablanca"
+                                            },
+                                            "capacity": {
+                                                "type": "integer",
+                                                "example": 500
+                                            },
+                                            "available_seats": {
+                                                "type": "integer",
+                                                "example": 450
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "example": "vip"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Zone avec meilleur confort"
+                                            },
+                                            "image": {
+                                                "type": "string",
+                                                "example": "zone_vip.png"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/zone-details/{id}": {
+            "get": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Afficher le détail d'une zone",
+                "operationId": "014b0ee456fd820c23d25f3d08ef16ff",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la zone",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Zone récupérée avec succès"
+                    },
+                    "404": {
+                        "description": "Zone non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/add-zone": {
+            "post": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Créer une nouvelle zone (admin seulement)",
+                "operationId": "406a310e4e5340917cf9b62d1498e039",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "match_id",
+                                    "name",
+                                    "city",
+                                    "capacity"
+                                ],
+                                "properties": {
+                                    "matche_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Zone VIP"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Casablanca"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Stade National"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 33.5731
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": -7.5898
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 500
+                                    },
+                                    "available_seats": {
+                                        "type": "integer",
+                                        "example": 450
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "vip"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Zone avec meilleur confort"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "example": "zone_vip.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Zone créée avec succès"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/zone/{id}": {
+            "put": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Mettre à jour une zone (admin seulement)",
+                "operationId": "87944e7a9e777cd788e4c97552976d74",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la zone à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "match_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Zone VIP"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Casablanca"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Stade National"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 33.5731
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": -7.5898
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 500
+                                    },
+                                    "available_seats": {
+                                        "type": "integer",
+                                        "example": 450
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "vip"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Zone avec meilleur confort"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "example": "zone_vip.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Zone mise à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Zone non trouvée"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Supprimer une zone (admin seulement)",
+                "operationId": "9d09d2c5ca01d30ec88a5224700611d6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la zone à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Zone supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Zone non trouvée"
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/zone/search": {
+            "get": {
+                "tags": [
+                    "Zone"
+                ],
+                "summary": "Rechercher des zones (public)",
+                "operationId": "dddb37f9da25c406267441ee052699d6",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Nom de la zone",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Ville de la zone",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Type de zone",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultat de la recherche"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -227,8 +1890,36 @@
     },
     "tags": [
         {
-            "name": "Auth",
-            "description": "Auth"
+            "name": "CRUD _Users",
+            "description": "CRUD _Users"
+        },
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        },
+        {
+            "name": "Contact",
+            "description": "Contact"
+        },
+        {
+            "name": "Match",
+            "description": "Match"
+        },
+        {
+            "name": "Reservation",
+            "description": "Reservation"
+        },
+        {
+            "name": "Scan",
+            "description": "Scan"
+        },
+        {
+            "name": "Subscribe",
+            "description": "Subscribe"
+        },
+        {
+            "name": "Zone",
+            "description": "Zone"
         }
     ]
 }
