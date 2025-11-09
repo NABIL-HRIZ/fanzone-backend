@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MatcheController;
 use App\Http\Controllers\ZoneController;
@@ -36,6 +37,12 @@ Route::post('/register',[RegisteredUserController::class,'store']);
 Route::post('/login',[AuthenticatedSessionController::class,'login']);
 Route::post('/logout',[AuthenticatedSessionController::class,'destroy'])->middleware('auth:sanctum');
 
+//User Controller 
+
+Route::middleware(['auth:sanctum', 'role:admin|fan|agent'])->group(function () {
+    Route::get('/profile', [UserController::class, 'showProfile']);
+    Route::put('/profile', [UserController::class, 'updateProfile']);
+});
 
 
 // ADMIN PERMISSIONS 

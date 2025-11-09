@@ -5,34 +5,83 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
+
+use Illuminate\Support\Facades\Hash;
 
 class AdminTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_get_all_users()
+    /** @test */
+    public function admin_can_get_all_users()
     {
-        // 1. Créer un rôle admin
-        $adminRole = Role::create(['name' => 'admin']);
+        Role::firstOrCreate(['name' => 'admin']);
 
-        // 2. Créer un utilisateur admin
         $admin = User::factory()->create();
-        $admin->assignRole('admin');
+        $admin->syncRoles(['admin']);
 
-        // 3. Créer quelques utilisateurs "normaux"
         User::factory()->count(3)->create();
 
-        // 4. Se connecter comme admin et appeler l'API
         $response = $this->actingAs($admin, 'sanctum')
                          ->getJson('/api/show-fans');
 
-        // 5. Vérifier le statut 200
         $response->assertStatus(200);
 
-        // 6. Vérifier que JSON contient les champs attendus
         $response->assertJsonStructure([
             '*' => ['id', 'first_name', 'last_name', 'email', 'phone', 'roles']
         ]);
     }
+
+    /** @test */
+    public function admin_can_create_a_new_fan()
+    {
+        Role::firstOrCreate(['name' => 'admin']);
+        Role::firstOrCreate(['name' => 'fan']); 
+
+        $admin = User::factory()->create();
+        $admin->syncRoles(['admin']);
+
+        $fanData = [
+            'first_name' => 'Nabil',
+            'last_name' => 'Hariz',
+            'email' => 'fan@example.com',
+            'phone' => '0612345678',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->actingAs($admin, 'sanctum')
+                         ->postJson('/api/add-fan', $fanData);
+
+        $response->assertStatus(201);
+
+        $response->assertJsonStructure([
+            'message',
+            'user' => [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone',
+                'created_at',
+                'updated_at',
+            ],
+            'role',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'fan@example.com',
+            'first_name' => 'Nabil',
+            'last_name' => 'Hariz',
+            'phone' => '0612345678',
+        ]);
+
+        $user = User::where('email', 'fan@example.com')->first();
+        $this->assertTrue(Hash::check('password123', $user->password));
+
+        $this->assertTrue($user->hasRole('fan'));
+    }
+
+    
 }

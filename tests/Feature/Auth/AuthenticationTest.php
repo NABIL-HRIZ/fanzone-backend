@@ -1,35 +1,66 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+uses(RefreshDatabase::class);
 
-    $response = $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'password',
+test('user can login and receive token', function () {
+    $user = User::factory()->create([
+        'password' => Hash::make('password123'),
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response = $this->postJson('/api/login', [
+        'email' => $user->email,
+        'password' => 'password123',
+    ]);
+
+    $response->assertStatus(200)
+             ->assertJsonStructure([
+                 'user' => ['id', 'first_name', 'last_name', 'email'],
+                 'token',
+                 'role'
+             ]);
+
+   
 });
 
-test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+test('user cannot login with wrong password', function () {
+    $user = User::factory()->create([
+        'password' => Hash::make('password123'),
+    ]);
 
-    $this->post('/login', [
+    $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
-    ]);
-
-    $this->assertGuest();
+    ])->assertStatus(422);
 });
 
-test('users can logout', function () {
-    $user = User::factory()->create();
+test('user can logout', function () {
+   
+    $user = User::factory()->create([
+        'password' => Hash::make('password123'),
+    ]);
 
-    $response = $this->actingAs($user)->post('/logout');
+    
+    $loginResponse = $this->postJson('/api/login', [
+        'email' => $user->email,
+        'password' => 'password123',
+    ]);
 
-    $this->assertGuest();
-    $response->assertNoContent();
+    $loginResponse->assertStatus(200);
+    $token = $loginResponse->json('token');
+
+    
+    $logoutResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
+                           ->postJson('/api/logout');
+
+    $logoutResponse->assertStatus(200)
+                   ->assertJson([
+                       'message' => 'Logged out successfully.'
+                   ]);
+
+   
 });
