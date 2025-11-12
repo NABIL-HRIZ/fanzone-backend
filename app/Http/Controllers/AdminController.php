@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
+use App\Jobs\SendWelcomeEmailJob;
 
 class AdminController extends Controller
 {
@@ -101,6 +102,9 @@ class AdminController extends Controller
 
         $user->syncRoles(['fan']);
         $roles=$user->roles->pluck('name');
+
+
+              SendWelcomeEmailJob::dispatch($user);
 
         return response()->json([
             'message'=>'Un nouveau fan enregistré',

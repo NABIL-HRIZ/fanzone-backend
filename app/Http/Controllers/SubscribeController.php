@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Subscribe;
+use App\Models\Matche;
+use App\Jobs\SendMatchReminderJob;
+
 
 class SubscribeController extends Controller
 {
@@ -32,7 +35,7 @@ class SubscribeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:subscribers,email',
+            'email' => 'required|email|unique:subscribes,email',
         ]);
 
         Subscribe::create([
@@ -66,4 +69,10 @@ class SubscribeController extends Controller
         $emails = Subscribe::pluck('email');
         return response()->json(['emails' => $emails]);
     }
+
+
+
+    // send  match reminder 
+
+    
 }

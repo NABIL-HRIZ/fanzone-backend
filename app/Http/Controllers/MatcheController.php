@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Matche;
 use Illuminate\Http\Request;
-
+use App\Jobs\SendMatchReminderJob;
+use App\Models\Subscribe;
 class MatcheController extends Controller
 {
     /**
@@ -95,6 +96,14 @@ class MatcheController extends Controller
         ]);
 
         $match = Matche::create($validated);
+
+        $subscribes = Subscribe::all(); 
+       foreach ($subscribes as $subscribe) {
+        
+       dispatch(new SendMatchReminderJob($subscribe->email, $match))
+    ->delay($match->match_date->subHours(24));
+
+    }
 
         return response()->json([
             'message'=>'Match créé avec succès',

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use App\Models\Role;
+use App\Jobs\SendWelcomeEmailJob;
 
 class RegisteredUserController extends Controller
 {
@@ -64,15 +65,19 @@ class RegisteredUserController extends Controller
 
         $roles = $user->roles->pluck('name');
 
+        
 
         
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        
-
-        event(new Registered($user));
-
         Auth::login($user);
+
+
+         event(new Registered($user));
+         
+       SendWelcomeEmailJob::dispatch($user);
+
+
 
         return response()->json([
             'message' => 'User registered successfully',

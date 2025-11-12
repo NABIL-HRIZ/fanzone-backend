@@ -20,6 +20,11 @@ class Matche extends Model
         'description',
     ];
 
+    protected $casts = [
+        'match_date' => 'datetime',
+    ];
+
+    
      public function zones()
     {
         return $this->hasMany(Zone::class);

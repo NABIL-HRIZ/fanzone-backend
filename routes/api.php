@@ -72,11 +72,14 @@ Route::middleware('auth:sanctum','role:admin')->group(function(){
     Route::post('/add-match',[MatcheController::class,'store']);
     Route::put('/match/{id}',[MatcheController::class,'update']);
     Route::delete('/match/{id}',[MatcheController::class,'destroy']);
+   
 
    // sunscribe controller 
 
     Route::get('/show-emails', [SubscribeController::class,'getEmails']);
 });
+
+
 
 
 
