@@ -6,9 +6,26 @@ use Illuminate\Http\Request;
 use App\Models\Zone;
 use App\Models\Matche;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class ZoneController extends Controller
 {
+
+
+public function getMarocZones(Request $request)
+{
+    $cacheKey = 'maroc_zones';
+
+    return Cache::remember($cacheKey, 3600, function () {
+        return Zone::with('match')
+            ->whereHas('match', function ($q) {
+                $q->where('team_one_title', 'like', '%Maroc%')
+                  ->orWhere('team_two_title', 'like', '%Maroc%');
+            })
+            ->get();
+    });
+}
+
     /**
      * @OA\Get(
      *     path="/api/show-zones",
@@ -36,7 +53,7 @@ class ZoneController extends Controller
      */
     public function index()
     {
-        $zones = Zone::with('match')->paginate(10);
+        $zones = Zone::with('match')->orderBy('created_at', 'desc')->paginate(10);
         return response()->json($zones);
     }
 
@@ -107,6 +124,9 @@ class ZoneController extends Controller
 
         $zone = Zone::create($validated);
 
+          Cache::forget('maroc_zones');
+        $zone->load('match');
+
         return response()->json($zone, 201);
     }
 
@@ -149,7 +169,7 @@ class ZoneController extends Controller
         $zone = Zone::findOrFail($id);
 
         $validated = $request->validate([
-            'match_id'   => 'sometimes|exists:matches,id',
+            'matche_id'   => 'sometimes|exists:matches,id',
             'name'       => 'sometimes|string|max:255',
             'city'       => 'sometimes|string|max:255',
             'address'    => 'nullable|string|max:255',
@@ -163,6 +183,9 @@ class ZoneController extends Controller
         ]);
 
         $zone->update($validated);
+
+           Cache::forget('maroc_zones');
+
 
         return response()->json($zone);
     }

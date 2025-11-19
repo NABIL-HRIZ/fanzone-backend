@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reservation;
+use App\Models\Zone;
 
 class ReservationController extends Controller
 {
@@ -211,44 +212,56 @@ class ReservationController extends Controller
    
  // Stripe Webhook
    
-public function handleWebhook(Request $request)
+public function handleWebHook(Request $request)
 {
     $payload = $request->getContent();
-    $sig_header = $request->header('Stripe-Signature');
+    $sig_header = $request->header('stripe-signature');
     $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
 
     try {
-        $event = \Stripe\Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
+        $event = \Stripe\Webhook::constructEvent(
+            $payload, $sig_header, $endpoint_secret
+        );
     } catch (\Exception $e) {
-        \Log::error('Stripe Webhook Error: ' . $e->getMessage());
-        return response()->json(['error' => $e->getMessage()], 400);
+        return response('Invalid signature', 400);
     }
 
     if ($event->type === 'checkout.session.completed') {
         $session = $event->data->object;
-        $meta = $session->metadata;
 
-        $user_id = $meta->user_id ?? null;
-        $zone_id = $meta->zone_id ?? null;
-        $number_of_tickets = $meta->number_of_tickets ?? 1;
-        $total_price = $meta->total_price ?? ($session->amount_total / 100);
+        // metadata
+        $user_id = $session->metadata->user_id ?? null;
+        $zone_id = $session->metadata->zone_id ?? null;
+        $quantity = $session->metadata->quantity ?? 1;
 
-        if ($user_id && $zone_id) {
-            \App\Models\Reservation::create([
-                'user_id' => $user_id,
-                'zone_id' => $zone_id,
-                'number_of_tickets' => $number_of_tickets,
-                'total_price' => $total_price,
-                'payment_status' => 'paid',
-                'reservation_date' => now(),
-                'stripe_session_id' => $session->id,
-                'stripe_payment_intent_id' => $session->payment_intent,
-            ]);
+        // if no user_id in session metadata, log and abort to avoid creating orphan reservations
+        if (empty($user_id)) {
+            \Log::error('Stripe webhook missing user_id in session metadata', ['session_id' => $session->id, 'metadata' => $session->metadata]);
+            // Return 400 so Stripe can retry the webhook after the issue is fixed
+            return response('Missing user_id in metadata', 400);
         }
+
+        // create reservation
+        $reservation = Reservation::create([
+            'user_id' => $user_id,
+            'zone_id' => $zone_id,
+            'number_of_tickets' => $quantity,
+            'total_price' => $session->amount_total / 100,
+            'payment_status' => 'paid',
+            'reservation_date' => now(),
+            'stripe_session_id' => $session->id,
+            'stripe_payment_intent_id' => $session->payment_intent,
+        ]);
+
+    // update available seats
+        $zone = Zone::find($zone_id);
+        $zone->available_seats -= $quantity;
+        $zone->save();
     }
 
-    return response()->json(['status' => 'success']);
+    return response('Webhook handled', 200);
 }
+
 }
 
 

@@ -12,10 +12,11 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SubscribeController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\TicketController;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Checkout\Session;
-
+use App\Models\Zone;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,7 @@ Route::middleware('auth:sanctum','role:admin')->group(function(){
     Route::get('/zone-details/{id}',[ZoneController::class,'show']);
    Route::get('/zone/search',[ZoneController::class,'search']);
 
+   Route::get('/maroc-zones',[ZoneController::class,"getMarocZones"]);
 
 
 
@@ -113,10 +115,12 @@ Route::middleware('auth:sanctum','role:admin')->group(function(){
 });
 
 
-Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:fan'])->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);       
     Route::get('/reservations/my', [ReservationController::class, 'myReservations']); 
-    Route::put('/reservations/{id}', [ReservationController::class, 'update']);   
+    Route::put('/reservations/{id}', [ReservationController::class, 'update']);  
+    Route::get('/download-ticket/{id}', [TicketController::class, 'downloadTicket']);
+ 
 });
 
 Route::middleware(['auth:sanctum', 'role:agent'])->group(function () {
@@ -150,33 +154,81 @@ Route::post('/contact', [ContactController::class, 'store']);
 // stripe 
 
 Route::post('/create-checkout-session', function (Request $request) {
+
     Stripe::setApiKey(env('STRIPE_SECRET'));
 
-    $session = Session::create([
-        'payment_method_types' => ['card'],
-        'line_items' => [[
+    // Validate input
+    $validated = $request->validate([
+        'zone_id' => 'required|exists:zones,id',
+        'items' => 'sometimes|array',
+        'quantity' => 'nullable|integer|min:1',
+        // allow front-end to send user_id (we'll prefer authenticated user if available)
+        'user_id' => 'sometimes|exists:users,id',
+    ]);
+
+    $zone = Zone::find($validated['zone_id']);
+
+    if (!$zone) {
+        return response()->json(['error' => 'Zone not found'], 404);
+    }
+
+    $line_items = [];
+
+    // If front-end sent a detailed items array, use it; otherwise create a single
+    // line item from the selected zone.
+    if (!empty($validated['items'])) {
+        foreach ($validated['items'] as $item) {
+            // Ensure required fields are present
+            $name = $item['name'] ?? ($zone->name ?? 'Ticket');
+            $unit = isset($item['price']) ? intval($item['price'] * 100) : intval($zone->price * 100);
+            $qty = $item['quantity'] ?? ($validated['quantity'] ?? 1);
+
+            $line_items[] = [
+                'price_data' => [
+                    'currency' => 'mad',
+                    'unit_amount' => $unit,
+                    'product_data' => [
+                        'name' => $name,
+                    ],
+                ],
+                'quantity' => $qty,
+            ];
+        }
+    } else {
+        $qty = $validated['quantity'] ?? 1;
+        $line_items[] = [
             'price_data' => [
                 'currency' => 'mad',
-                'unit_amount' => $request->amount * 100,
+                'unit_amount' => intval($zone->price * 100),
                 'product_data' => [
-                    'name' => $request->title,
+                    // Zone has `name` column (not `title`)
+                    'name' => $zone->name ?? 'Ticket',
                 ],
             ],
-            'quantity' => $request->count,
-        ]],
+            'quantity' => $qty,
+        ];
+    }
+
+    // determine user id for metadata: prefer authenticated user, fall back to provided user_id
+    $metadataUserId = auth()->id() ?? ($validated['user_id'] ?? null);
+
+    $session = \Stripe\Checkout\Session::create([
+        'payment_method_types' => ['card'],
+        'line_items' => $line_items,
         'mode' => 'payment',
         'success_url' => 'http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url' => 'http://localhost:5173/cancel',
-         'metadata' => [
-            'user_id' => $request->user_id,
-            'zone_id' => $request->zone_id,
-            'number_of_tickets' => $request->number_of_tickets,
-            'total_price' => $request->total_price,
-        ],
+        'metadata' => [
+            'user_id' => $metadataUserId,
+            'zone_id' => $zone->id,
+            'quantity' => $validated['quantity'] ?? null,
+        ]
     ]);
+
 
     return response()->json(['url' => $session->url]);
 });
+
 
 
 // WEBHOOKS

@@ -13,7 +13,7 @@ class Zone extends Model
     use HasFactory;
 
      protected $fillable = [
-        'match_id',
+        'matche_id',
         'name',
         'city',
         'address',
@@ -24,13 +24,15 @@ class Zone extends Model
         'type',
         'description',
         'image',
+        'price'
     ];
 
      
 
     public function match()
     {
-        return $this->belongsTo(Matche::class);
+        
+        return $this->belongsTo(Matche::class, 'matche_id');
     }
 
     public function tickets()

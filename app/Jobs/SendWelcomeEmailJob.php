@@ -8,22 +8,20 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\WelcomeMail;   // NOTE: WelcomeMail (pas WelcomeEmail)
+use App\Mail\WelcomeMail;  
 use App\Models\User;
 
 class SendWelcomeEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // ------ Déclarer la propriété ici (publique pour la sérialisation) ------
-    public User $user; // (ou `public $user;` si tu préfères sans typage)
+   
+    public User $user; 
 
-    /**
-     * Create a new job instance.
-     */
+   
     public function __construct(User $user)
     {
-        // on assigne la propriété dans le constructeur
+        
         $this->user = $user;
     }
 

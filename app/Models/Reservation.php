@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\Reservation;
+use App\Models\Zone;
 
 
 
@@ -33,7 +33,8 @@ protected $table = 'reservation_tickets';
 
 public function fanZone()
 {
-    return $this->belongsTo(Zone::class);
+   
+    return $this->belongsTo(Zone::class, 'zone_id');
 }
 
 }
