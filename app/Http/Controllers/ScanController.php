@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Scan;
+use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 class ScanController extends Controller
 {
     /**
@@ -19,7 +21,7 @@ class ScanController extends Controller
      */
     public function index()
     {
-        $scans = Scan::with(['agent', 'ticket.fanZone.match'])->latest()->get();
+        $scans = Scan::with(['agent', 'reservation.fanZone.match'])->latest()->get();
         return response()->json($scans);
     }
 
@@ -32,8 +34,8 @@ class ScanController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"ticket_id","scan_status"},
-     *             @OA\Property(property="ticket_id", type="integer", example=1),
+     *             required={"reservation_id","scan_status"},
+     *             @OA\Property(property="reservation_id", type="integer", example=1),
      *             @OA\Property(property="scan_status", type="string", enum={"valid","invalid"}, example="valid")
      *         )
      *     ),
@@ -41,25 +43,72 @@ class ScanController extends Controller
      *     @OA\Response(response=400, description="Erreur de validation")
      * )
      */
-    public function store(Request $request)
-    {
-        $request->validate([
+  public function store(Request $request)
+{
+    try {
+        // Normalize incoming ticket_id: accept numeric, string numeric, or 'reservation_123'
+        $raw = $request->input('ticket_id');
+        if (is_null($raw)) {
+            return response()->json(['message' => 'ticket_id manquant'], 422);
+        }
+
+        if (is_string($raw) && preg_match('/^reservation_(\d+)$/', $raw, $m)) {
+            $ticketId = (int) $m[1];
+        } elseif (is_numeric($raw)) {
+            $ticketId = (int) $raw;
+        } else {
+            // try trim and cast
+            $trimmed = trim((string) $raw);
+            if (is_numeric($trimmed)) {
+                $ticketId = (int) $trimmed;
+            } else {
+                return response()->json(['message' => 'Identifiant de ticket invalide'], 422);
+            }
+        }
+
+        // Validate existence
+        $validator = Validator::make(['ticket_id' => $ticketId], [
             'ticket_id' => 'required|exists:reservation_tickets,id',
-            'scan_status' => 'required|in:valid,invalid',
         ]);
+
+        if ($validator->fails()) {
+            // Log for debugging
+            Log::warning('Scan validation failed', ['ticket_raw' => $raw, 'ticket_normalized' => $ticketId, 'errors' => $validator->errors()->toArray()]);
+            return response()->json(['message' => 'Validation échouée', 'errors' => $validator->errors()], 422);
+        }
+
+        $reservation = Reservation::with('fanZone.match')->find($ticketId);
+
+        if (!$reservation) {
+            return response()->json(['message' => 'Ticket introuvable'], 404);
+        }
+
+        $alreadyScanned = Scan::where('ticket_id', $ticketId)->exists();
+        if ($alreadyScanned) {
+            return response()->json(['message' => 'Ticket déjà scanné'], 400);
+        }
 
         $scan = Scan::create([
             'agent_id' => Auth::id(),
-            'ticket_id' => $request->ticket_id,
+            'ticket_id' => $ticketId,
             'scan_time' => now(),
-            'scan_status' => $request->scan_status,
+            'scan_status' => 'valid'
         ]);
 
         return response()->json([
-            'message' => 'Scan enregistré avec succès.',
+            'message' => 'Ticket validé avec succès',
             'data' => $scan
         ], 201);
+    } catch (\Illuminate\Auth\AuthenticationException $e) {
+        return response()->json(['message' => 'Non authentifié'], 401);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json(['message' => 'Validation échouée', 'errors' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        Log::error('Scan store exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return response()->json(['message' => 'Erreur serveur', 'error' => $e->getMessage()], 500);
     }
+}
+
 
     /**
      * @OA\Get(
@@ -80,7 +129,7 @@ class ScanController extends Controller
      */
     public function show($id)
     {
-        $scan = Scan::with(['agent', 'ticket.fanZone.match'])->findOrFail($id);
+        $scan = Scan::with(['agent', 'reservation.fanZone.match'])->findOrFail($id);
         return response()->json($scan);
     }
 
@@ -151,10 +200,10 @@ class ScanController extends Controller
     /**
      * @OA\Get(
      *     path="/api/scans/search",
-     *     summary="Rechercher des scans par ticket, agent ou statut",
+     *     summary="Rechercher des scans par reservation, agent ou statut",
      *     tags={"Scan"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="ticket_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="reservation_id", in="query", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="agent_id", in="query", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="scan_status", in="query", @OA\Schema(type="string", enum={"valid","invalid"})),
      *     @OA\Response(response=200, description="Résultat de la recherche")
@@ -164,11 +213,11 @@ class ScanController extends Controller
     {
         $query = Scan::query();
 
-        if ($request->ticket_id) $query->where('ticket_id', $request->ticket_id);
+        if ($request->reservation_id) $query->where('reservation_id', $request->reservation_id);
         if ($request->agent_id) $query->where('agent_id', $request->agent_id);
         if ($request->scan_status) $query->where('scan_status', $request->scan_status);
 
-        $scans = $query->with(['agent', 'ticket.fanZone.match'])->get();
+        $scans = $query->with(['agent', 'reservation.fanZone.match'])->get();
 
         return response()->json($scans);
     }

@@ -6,18 +6,31 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
     public function downloadTicket($id)
     {
+        // 1️⃣ Check authenticated user (Sanctum)
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $reservation = Reservation::with('fanZone.match')->findOrFail($id);
 
-        $qrCode = QrCode::format('png')->size(200)->generate('reservation_'.$reservation->id);
+        if ($reservation->user_id !== $user->id) {
+            return response()->json(['message' => 'Accès refusé'], 403);
+        }
 
-        $pdf = Pdf::loadView('ticket', compact('reservation', 'qrCode'));
+       $qrCode = QrCode::format('svg')->size(200)->generate('reservation_' . $reservation->id);
 
-        return $pdf->download('ticket_'.$reservation->id.'.pdf');
+        $pdf = Pdf::loadView('ticket', [
+            'reservation' => $reservation,
+            'qrCode' => $qrCode
+        ]);
+
+        return $pdf->download('ticket_' . $reservation->id . '.pdf');
     }
 }

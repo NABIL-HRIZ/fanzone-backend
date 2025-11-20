@@ -162,7 +162,6 @@ Route::post('/create-checkout-session', function (Request $request) {
         'zone_id' => 'required|exists:zones,id',
         'items' => 'sometimes|array',
         'quantity' => 'nullable|integer|min:1',
-        // allow front-end to send user_id (we'll prefer authenticated user if available)
         'user_id' => 'sometimes|exists:users,id',
     ]);
 

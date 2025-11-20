@@ -12,22 +12,21 @@ class Scan extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-    'agent_id',       
-    'ticket_id',      
-    'scan_time',
-    'scan_status',  
-];
+        protected $fillable = [
+            'agent_id',
+            'ticket_id',
+            'scan_time',
+            'scan_status',
+        ];
 
+        public function agent()
+        {
+            return $this->belongsTo(User::class, 'agent_id');
+        }
 
-public function agent()
-{
-    return $this->belongsTo(User::class, 'agent_id');
-}
-
-public function ticket()
-{
-    return $this->belongsTo(Reservation::class, 'ticket_id');
-}
+        public function ticket()
+        {
+            return $this->belongsTo(\App\Models\Reservation::class, 'ticket_id');
+        }
 
 }

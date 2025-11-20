@@ -32,7 +32,7 @@
 
     <p><strong>Match :</strong> {{ $reservation->fanZone->match->team_one_title }} vs {{ $reservation->fanZone->match->team_two_title }}</p>
     <p><strong>Status :</strong> {{ $reservation->payment_status }}</p>
-    <p><strong>Zone :</strong> {{ $reservation->fanZone->zone_name }}</p>
+    <p><strong>Zone :</strong> {{ $reservation->fanZone->name }}</p>
     <p><strong>Prix total :</strong> {{ $reservation->total_price }} DH</p>
     <p><strong>Date réservation :</strong> {{ $reservation->reservation_date }}</p>
     <p><strong>Nombre de tickets :</strong> {{ $reservation->number_of_tickets }}</p>
