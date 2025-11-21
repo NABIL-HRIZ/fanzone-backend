@@ -44,7 +44,7 @@ class MatchReminderMail extends Mailable
 
     public function build()
     {
-        // Remove $this->email from here since we'll set it when sending
+        
         return $this->subject("Rappel : Match à venir")
                     ->markdown('emails.match_reminder');
     }

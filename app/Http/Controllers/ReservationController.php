@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reservation;
 use App\Models\Zone;
-
+use App\Jobs\SendTicketJob;
+use App\Models\User;
+use Illuminate\Support\Facades\Event;
+USE App\Events\ZoneSeatsUpdated;
 class ReservationController extends Controller
 {
     /**
@@ -87,6 +90,13 @@ class ReservationController extends Controller
         ]);
 
         $reservation = Reservation::create($validated);
+
+        $user = User::find($validated['user_id']);
+        if ($user) {
+           
+            SendTicketJob::dispatch($user->email, $reservation);
+        }
+
 
         return response()->json($reservation, 201);
     }
@@ -229,19 +239,14 @@ public function handleWebHook(Request $request)
     if ($event->type === 'checkout.session.completed') {
         $session = $event->data->object;
 
-        // metadata
+        
         $user_id = $session->metadata->user_id ?? null;
         $zone_id = $session->metadata->zone_id ?? null;
         $quantity = $session->metadata->quantity ?? 1;
 
-        // if no user_id in session metadata, log and abort to avoid creating orphan reservations
-        if (empty($user_id)) {
-            \Log::error('Stripe webhook missing user_id in session metadata', ['session_id' => $session->id, 'metadata' => $session->metadata]);
-            // Return 400 so Stripe can retry the webhook after the issue is fixed
-            return response('Missing user_id in metadata', 400);
-        }
+       
 
-        // create reservation
+        
         $reservation = Reservation::create([
             'user_id' => $user_id,
             'zone_id' => $zone_id,
@@ -253,11 +258,18 @@ public function handleWebHook(Request $request)
             'stripe_payment_intent_id' => $session->payment_intent,
         ]);
 
-    // update available seats
+   
         $zone = Zone::find($zone_id);
-        $zone->available_seats -= $quantity;
+event(new ZoneSeatsUpdated($zone, $quantity));
         $zone->save();
     }
+
+    $user = User::find($user_id);
+
+if ($user) {
+    SendTicketJob::dispatch($user->email, $reservation);
+}
+
 
     return response('Webhook handled', 200);
 }

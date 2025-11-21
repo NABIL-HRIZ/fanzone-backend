@@ -12,7 +12,6 @@ class TicketController extends Controller
 {
     public function downloadTicket($id)
     {
-        // 1️⃣ Check authenticated user (Sanctum)
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -24,7 +23,7 @@ class TicketController extends Controller
             return response()->json(['message' => 'Accès refusé'], 403);
         }
 
-       $qrCode = QrCode::format('svg')->size(200)->generate('reservation_' . $reservation->id);
+    $qrCode = QrCode::format('svg')->size(200)->generate('reservation_' . $reservation->id);
 
         $pdf = Pdf::loadView('ticket', [
             'reservation' => $reservation,

@@ -43,38 +43,27 @@ class ScanController extends Controller
      *     @OA\Response(response=400, description="Erreur de validation")
      * )
      */
-  public function store(Request $request)
+public function store(Request $request)
 {
     try {
-        // Normalize incoming ticket_id: accept numeric, string numeric, or 'reservation_123'
-        $raw = $request->input('ticket_id');
-        if (is_null($raw)) {
-            return response()->json(['message' => 'ticket_id manquant'], 422);
-        }
+       
+       $raw = $request->input('ticket_id');
 
-        if (is_string($raw) && preg_match('/^reservation_(\d+)$/', $raw, $m)) {
-            $ticketId = (int) $m[1];
-        } elseif (is_numeric($raw)) {
-            $ticketId = (int) $raw;
-        } else {
-            // try trim and cast
-            $trimmed = trim((string) $raw);
-            if (is_numeric($trimmed)) {
-                $ticketId = (int) $trimmed;
-            } else {
-                return response()->json(['message' => 'Identifiant de ticket invalide'], 422);
-            }
-        }
+        $ticketId = filter_var($raw, FILTER_SANITIZE_NUMBER_INT);
 
-        // Validate existence
+if (!$ticketId) {
+    return response()->json(['message' => 'Identifiant de ticket invalide'], 422);
+}
+
         $validator = Validator::make(['ticket_id' => $ticketId], [
-            'ticket_id' => 'required|exists:reservation_tickets,id',
+            'ticket_id' => 'required|integer|exists:reservation_tickets,id',
         ]);
 
         if ($validator->fails()) {
-            // Log for debugging
-            Log::warning('Scan validation failed', ['ticket_raw' => $raw, 'ticket_normalized' => $ticketId, 'errors' => $validator->errors()->toArray()]);
-            return response()->json(['message' => 'Validation échouée', 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation échouée',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $reservation = Reservation::with('fanZone.match')->find($ticketId);
@@ -99,15 +88,15 @@ class ScanController extends Controller
             'message' => 'Ticket validé avec succès',
             'data' => $scan
         ], 201);
-    } catch (\Illuminate\Auth\AuthenticationException $e) {
-        return response()->json(['message' => 'Non authentifié'], 401);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json(['message' => 'Validation échouée', 'errors' => $e->errors()], 422);
+
     } catch (\Exception $e) {
-        Log::error('Scan store exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-        return response()->json(['message' => 'Erreur serveur', 'error' => $e->getMessage()], 500);
+        return response()->json([
+            'message' => 'Erreur serveur',
+            'error' => $e->getMessage()
+        ], 500);
     }
 }
+
 
 
     /**

@@ -157,7 +157,7 @@ Route::post('/create-checkout-session', function (Request $request) {
 
     Stripe::setApiKey(env('STRIPE_SECRET'));
 
-    // Validate input
+    
     $validated = $request->validate([
         'zone_id' => 'required|exists:zones,id',
         'items' => 'sometimes|array',
@@ -173,11 +173,9 @@ Route::post('/create-checkout-session', function (Request $request) {
 
     $line_items = [];
 
-    // If front-end sent a detailed items array, use it; otherwise create a single
-    // line item from the selected zone.
     if (!empty($validated['items'])) {
         foreach ($validated['items'] as $item) {
-            // Ensure required fields are present
+           
             $name = $item['name'] ?? ($zone->name ?? 'Ticket');
             $unit = isset($item['price']) ? intval($item['price'] * 100) : intval($zone->price * 100);
             $qty = $item['quantity'] ?? ($validated['quantity'] ?? 1);
@@ -200,7 +198,7 @@ Route::post('/create-checkout-session', function (Request $request) {
                 'currency' => 'mad',
                 'unit_amount' => intval($zone->price * 100),
                 'product_data' => [
-                    // Zone has `name` column (not `title`)
+                   
                     'name' => $zone->name ?? 'Ticket',
                 ],
             ],
@@ -208,7 +206,6 @@ Route::post('/create-checkout-session', function (Request $request) {
         ];
     }
 
-    // determine user id for metadata: prefer authenticated user, fall back to provided user_id
     $metadataUserId = auth()->id() ?? ($validated['user_id'] ?? null);
 
     $session = \Stripe\Checkout\Session::create([
@@ -232,4 +229,4 @@ Route::post('/create-checkout-session', function (Request $request) {
 
 // WEBHOOKS
 
-Route::post('/stripe/webhook', [ReservationController::class, 'handleWebhook']);
+Route::post('/stripe/webhook', [ReservationController::class, 'handleWebHook']);
