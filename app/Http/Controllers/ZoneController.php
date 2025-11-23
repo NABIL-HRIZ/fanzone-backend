@@ -117,9 +117,11 @@ public function getMarocZones(Request $request)
             'longitude'  => 'nullable|numeric',
             'capacity'   => 'required|integer|min:0',
             'available_seats' => 'nullable|integer|min:0',
+           'price' => 'required|numeric|min:0',
             'type'       => 'nullable|in:vip,standard,famille',
             'description'=> 'nullable|string',
             'image'      => 'nullable|string|max:255',
+
         ]);
 
         $zone = Zone::create($validated);
@@ -180,6 +182,8 @@ public function getMarocZones(Request $request)
             'type'       => 'nullable|in:vip,standard,famille',
             'description'=> 'nullable|string',
             'image'      => 'nullable|string|max:255',
+           'price' => 'sometimes|numeric|min:0',
+
         ]);
 
         $zone->update($validated);

@@ -54,6 +54,7 @@ class AdminController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'roles' => $user->roles->pluck('name'),
+                'created_at'=>$user->created_at,
             ];
         });
 
@@ -89,7 +90,8 @@ class AdminController extends Controller
             'last_name'=>'required|string|max:255',
             'email'=>'required|email|unique:users,email',
             'phone'=>'nullable|string|max:10',
-            'password'=>'required|string|min:8|confirmed'
+            'password'=>'required|string|min:8|confirmed',
+             'role'       => 'required|in:fan,agent,admin',
         ]);
 
         $user=User::create([
@@ -100,7 +102,8 @@ class AdminController extends Controller
             'password'=>Hash::make($request->password)
         ]);
 
-        $user->syncRoles(['fan']);
+        $requestedRole = $request->input('role', 'fan');
+        $user->syncRoles([$requestedRole]);
         $roles=$user->roles->pluck('name');
 
 
@@ -153,11 +156,18 @@ class AdminController extends Controller
             'email'      => 'sometimes|email|unique:users,email,' . $id,
             'phone'      => 'sometimes|string|max:10',
             'password'   => 'sometimes|string|min:8|confirmed',
+             'role'       => 'sometimes|in:fan,agent,admin',
+
         ]);
 
         if (isset($validated['password'])) $validated['password'] = Hash::make($validated['password']);
 
+        
         $user->update($validated);
+
+        if (isset($validated['role'])) {
+            $user->syncRoles([$validated['role']]);
+        }
 
         return response()->json(['message'=>'User updated successfully','user'=>$user],200);
     }
