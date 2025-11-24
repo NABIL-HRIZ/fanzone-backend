@@ -13,15 +13,16 @@ class TicketController extends Controller
     public function downloadTicket($id)
     {
         $user = Auth::guard('sanctum')->user();
+       
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $reservation = Reservation::with('fanZone.match')->findOrFail($id);
 
-        if ($reservation->user_id !== $user->id) {
-            return response()->json(['message' => 'Accès refusé'], 403);
-        }
+       if ($reservation->user_id !== $user->id && !$user->hasRole('admin')) {
+    return response()->json(['message' => 'Accès refusé'], 403);
+}
 
     $qrCode = QrCode::format('svg')->size(200)->generate('reservation_' . $reservation->id);
 

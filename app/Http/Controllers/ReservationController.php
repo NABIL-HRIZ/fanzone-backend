@@ -24,7 +24,7 @@ class ReservationController extends Controller
     {
         $reservations = Reservation::with(['user', 'fanZone'])
             ->orderBy('reservation_date', 'desc')
-            ->paginate(10);
+            ->get();
 
         return response()->json($reservations);
     }

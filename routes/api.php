@@ -112,24 +112,28 @@ Route::middleware('auth:sanctum','role:admin')->group(function(){
     Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index']);     
     Route::delete('/reservations/{id}', [ReservationController::class, 'destroy']); 
+    Route::put('/reservations/{id}', [ReservationController::class, 'update']);  
+    Route::get('/reservations/{id}', [ReservationController::class, 'show']);    
+    Route::get('/reservations/search', [ReservationController::class, 'search']);
+
 });
 
 
 Route::middleware(['auth:sanctum', 'role:fan'])->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);       
     Route::get('/reservations/my', [ReservationController::class, 'myReservations']); 
-    Route::put('/reservations/{id}', [ReservationController::class, 'update']);  
-    Route::get('/download-ticket/{id}', [TicketController::class, 'downloadTicket']);
  
 });
 
-Route::middleware(['auth:sanctum', 'role:agent'])->group(function () {
-    Route::get('/reservations/{id}', [ReservationController::class, 'show']);    
-    Route::get('/reservations/search', [ReservationController::class, 'search']); 
+
+// download pdf 
+
+Route::middleware(['auth:sanctum', 'role:admin,fan'])->group(function () {
+    Route::get('/download-ticket/{id}', [TicketController::class, 'downloadTicket']);
 });
 
 
-// Scan controller 
+
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/scans', [ScanController::class, 'index']);
