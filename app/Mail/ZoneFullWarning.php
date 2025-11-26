@@ -23,8 +23,8 @@ class ZoneFullWarning extends Mailable
     public function build()
     {
         $subject = $this->type === 'full'
-            ? "⚠️ Zone \"{$this->zone->name}\" est COMPLÈTE"
-            : "⚠️ Zone \"{$this->zone->name}\" est presque pleine";
+            ? " Zone \"{$this->zone->name}\" est COMPLÈTE"
+            : " Zone \"{$this->zone->name}\" est presque pleine";
 
         return $this->subject($subject)
                     ->view('emails.zone_warning');

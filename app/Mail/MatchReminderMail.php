@@ -17,7 +17,7 @@ class MatchReminderMail extends Mailable
     public string $email;
     public Matche $match;
 
-    // Fix: Remove the $email parameter since we're setting it in build()
+   
     public function __construct(Matche $match)
     {
         $this->match = $match;

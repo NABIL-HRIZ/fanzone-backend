@@ -72,7 +72,7 @@ class SubscribeController extends Controller
 
 
 
-    // send  match reminder 
+ 
 
     
 }

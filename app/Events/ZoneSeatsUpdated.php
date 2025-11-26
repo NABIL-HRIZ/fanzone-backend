@@ -33,6 +33,8 @@ class ZoneSeatsUpdated
      *
      * @return \Illuminate\Broadcasting\Channel|array
      */
+
+    
     public function broadcastOn(): array
     {
         return [

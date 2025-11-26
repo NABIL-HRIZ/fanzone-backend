@@ -260,7 +260,7 @@ public function handleWebHook(Request $request)
 
    
         $zone = Zone::find($zone_id);
-event(new ZoneSeatsUpdated($zone, $quantity));
+   event(new ZoneSeatsUpdated($zone, $quantity));
         $zone->save();
     }
 

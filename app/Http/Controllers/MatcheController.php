@@ -31,7 +31,8 @@ class MatcheController extends Controller
     public function index()
     {
         $matches = Matche::with('zones') 
-                         ->orderBy('match_date', 'asc') 
+        
+                         ->orderBy('match_date', 'desc') 
                          ->paginate(10);
 
         return response()->json($matches);
@@ -87,13 +88,18 @@ class MatcheController extends Controller
     {
         $validated = $request->validate([
             'team_one_title' => 'required|string|max:255',
-            'team_one_image' => 'nullable|string|max:255',
+            'team_one_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'team_two_title' => 'required|string|max:255',
-            'team_two_image' => 'nullable|string|max:255',
+            'team_two_image' =>'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'match_date'     => 'required|date',
             'stadium'        => 'nullable|string|max:255',
             'description'    => 'nullable|string',
         ]);
+
+         if ($request->hasFile('image')) {
+        $path = $request->file('image')->store('matches', 'public');
+        $validated['image'] = $path;
+    }
 
         $match = Matche::create($validated);
 

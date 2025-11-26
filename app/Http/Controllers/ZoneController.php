@@ -18,10 +18,11 @@ public function getMarocZones(Request $request)
 
     return Cache::remember($cacheKey, 3600, function () {
         return Zone::with('match')
-            ->whereHas('match', function ($q) {
-                $q->where('team_one_title', 'like', '%Maroc%')
-                  ->orWhere('team_two_title', 'like', '%Maroc%');
+            ->whereHas('match',function($q){
+                $q->where('team_one_title','like','%maroc%')
+                ->orWhere('team_two_title','like','%maroc%');
             })
+            
             ->get();
     });
 }
@@ -53,7 +54,9 @@ public function getMarocZones(Request $request)
      */
     public function index()
     {
-        $zones = Zone::with('match')->orderBy('created_at', 'desc')->paginate(10);
+        $zones = Zone::with('match')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
         return response()->json($zones);
     }
 
@@ -120,9 +123,14 @@ public function getMarocZones(Request $request)
            'price' => 'required|numeric|min:0',
             'type'       => 'nullable|in:vip,standard,famille',
             'description'=> 'nullable|string',
-            'image'      => 'nullable|string|max:255',
+          'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096'
 
         ]);
+
+         if ($request->hasFile('image')) {
+        $path = $request->file('image')->store('zones', 'public');
+        $validated['image'] = $path;
+    }
 
         $zone = Zone::create($validated);
 
@@ -231,24 +239,31 @@ public function getMarocZones(Request $request)
      *     @OA\Response(response=200, description="Résultat de la recherche")
      * )
      */
-    public function search(Request $request)
-    {
-        $query = Zone::with('match');
+  
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', "%{$request->name}%");
-        }
+     
+   public function search(Request $request){
+    $query = Zone::with('match');
 
-        if ($request->filled('city')) {
-            $query->where('city', 'like', "%{$request->city}%");
-        }
-
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-
-        $zones = $query->paginate(10);
-
-        return response()->json($zones);
+    if($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('city', 'like', "%{$search}%")
+              ->orWhereHas('match', function($m) use ($search) {
+                  $m->where('team_one_title', 'like', "%{$search}%")
+                    ->orWhere('team_two_title', 'like', "%{$search}%");
+              });
+        });
     }
+
+    $zones = $query->paginate(10);
+
+    return response()->json($zones);
 }
+
+
+    
+}
+
+
