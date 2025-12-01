@@ -1,11 +1,21 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "nixpacks",
-    "phpVersion": "8.2",
-    "buildCommand": "php artisan key:generate && php artisan storage:link && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+    "builder": "RAILPACK",             
+    "phpVersion": "8.2",                
+    "buildCommand": [
+      "composer install --no-dev --optimize-autoloader",
+      "php artisan key:generate",
+      "php artisan storage:link",
+      "php artisan config:cache",
+      "php artisan route:cache",
+      "php artisan view:cache"
+    ]
+  },
+  "environment": {
+    "NIXPACKS_PHP_ROOT_DIR": "/app/public" 
   },
   "deploy": {
-    "startCommand": "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
+    "startCommand": "php artisan serve --host=0.0.0.0 --port=$PORT"
   }
 }
