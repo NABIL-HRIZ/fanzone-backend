@@ -1202,7 +1202,7 @@
                     "Reservation"
                 ],
                 "summary": "Webhook Stripe pour créer des réservations après paiement",
-                "operationId": "21a9524c0adbd35515c2e7e2825f77d4",
+                "operationId": "a209624f2ebe49947d2f909db68e085e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1249,11 +1249,11 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "ticket_id",
+                                    "reservation_id",
                                     "scan_status"
                                 ],
                                 "properties": {
-                                    "ticket_id": {
+                                    "reservation_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -1406,11 +1406,11 @@
                 "tags": [
                     "Scan"
                 ],
-                "summary": "Rechercher des scans par ticket, agent ou statut",
+                "summary": "Rechercher des scans par reservation, agent ou statut",
                 "operationId": "235d313c9fd1567a5ab877a4ebf8fe61",
                 "parameters": [
                     {
-                        "name": "ticket_id",
+                        "name": "reservation_id",
                         "in": "query",
                         "schema": {
                             "type": "integer"

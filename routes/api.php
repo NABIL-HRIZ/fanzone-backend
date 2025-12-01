@@ -122,11 +122,11 @@ Route::middleware('auth:sanctum','role:admin')->group(function(){
 Route::middleware(['auth:sanctum', 'role:fan'])->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);       
     Route::get('/reservations/my', [ReservationController::class, 'myReservations']); 
- 
+
 });
 
 
-// download pdf 
+// download pdf  
 
 Route::middleware(['auth:sanctum', 'role:admin,fan'])->group(function () {
     Route::get('/download-ticket/{id}', [TicketController::class, 'downloadTicket']);
