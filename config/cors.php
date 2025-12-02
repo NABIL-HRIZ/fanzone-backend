@@ -8,9 +8,9 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('APP_URL', 'http://localhost:8000'),
-        env('FRONTEND_URL', 'http://localhost:5173'),
-        'http://localhost:8000',
+        env('APP_URL', 'fanzone-backend-production.up.railway.app'),
+        env('FRONTEND_URL', 'https://fanzone-frontend.vercel.app/'),
+        'fanzone-backend-production.up.railway.app',
         'http://127.0.0.1:8000'
     ],
 
